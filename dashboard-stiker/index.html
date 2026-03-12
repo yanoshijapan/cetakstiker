@@ -57,23 +57,22 @@
             <div class="max-w-4xl mx-auto space-y-6">
 
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <button onclick="toggleAccordion('kakejiku-menu', 'kakejiku-icon')" class="w-full flex justify-between items-center p-6 bg-white hover:bg-gray-50 transition-colors focus:outline-none">
+                    <button onclick="toggleAccordion('kakejiku-kp-menu', 'kakejiku-kp-icon')" class="w-full flex justify-between items-center p-6 bg-white hover:bg-gray-50 transition-colors focus:outline-none">
                         <div class="flex items-center">
                             <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
                                 <i class="fas fa-scroll"></i>
                             </div>
                             <h3 class="text-lg font-semibold text-gray-800 text-left">Cetak Stiker Kakejiku KP (Premium)</h3>
                         </div>
-                        <i id="kakejiku-icon" class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                        <i id="kakejiku-kp-icon" class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
                     </button>
                     
-                    <div id="kakejiku-menu" class="accordion-content bg-gray-50 border-t border-gray-100">
+                    <div id="kakejiku-kp-menu" class="accordion-content bg-gray-50 border-t border-gray-100">
                         <div class="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                             <script>
                                 const kpList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13];
-
+                
                                 kpList.forEach(num => {
-                                    // Path sekarang mengarah ke gambar JPG di folder ./img/
                                     const imgPath = `./img/kp${num}.jpg`; 
                                     
                                     document.write(`
@@ -90,28 +89,28 @@
                 </div>
                 
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <button onclick="toggleAccordion('kakejiku-menu', 'kakejiku-icon')" class="w-full flex justify-between items-center p-6 bg-white hover:bg-gray-50 transition-colors focus:outline-none">
+                    <button onclick="toggleAccordion('kakejiku-kd-menu', 'kakejiku-kd-icon')" class="w-full flex justify-between items-center p-6 bg-white hover:bg-gray-50 transition-colors focus:outline-none">
                         <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mr-4">
                                 <i class="fas fa-scroll"></i>
                             </div>
                             <h3 class="text-lg font-semibold text-gray-800 text-left">Cetak Stiker Kakejiku KD (Deluxe)</h3>
                         </div>
-                        <i id="kakejiku-icon" class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                        <i id="kakejiku-kd-icon" class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
                     </button>
                     
-                    <div id="kakejiku-menu" class="accordion-content bg-gray-50 border-t border-gray-100">
+                    <div id="kakejiku-kd-menu" class="accordion-content bg-gray-50 border-t border-gray-100">
                         <div class="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                             <script>
                                 const kdList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13];
-
-                                kpList.forEach(num => {
-                                    // Path sekarang mengarah ke gambar JPG di folder ./img/
+                
+                                // MENGGUNAKAN kdList.forEach, bukan kpList
+                                kdList.forEach(num => {
                                     const imgPath = `./img/kd${num}.jpg`; 
                                     
                                     document.write(`
                                         <button onclick="handlePrintImage('KD${num}', '${imgPath}')" 
-                                            class="py-2 px-4 bg-white border border-gray-200 text-gray-700 rounded-lg hover:border-blue-500 hover:text-blue-600 hover:shadow-md transition-all text-sm font-medium flex justify-between items-center group">
+                                            class="py-2 px-4 bg-white border border-gray-200 text-gray-700 rounded-lg hover:border-indigo-500 hover:text-indigo-600 hover:shadow-md transition-all text-sm font-medium flex justify-between items-center group">
                                             <span>KD ${num}</span>
                                             <i class="fas fa-print opacity-0 group-hover:opacity-100 transition-opacity"></i>
                                         </button>
@@ -225,4 +224,5 @@
 </body>
 
 </html>
+
 

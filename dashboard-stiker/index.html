@@ -7,6 +7,9 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+		
+		<!-- Library PDF.js -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
     <!-- Google Fonts: Space Grotesk (display) + Plus Jakarta Sans (body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -542,12 +545,61 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    showToast('Kartu ucapannya udah jadi', 'success');
-                    closeGreetingModal();
-                    handlePrintImage('Kartu Ucapan Personalisasi', result.image);
+                    // Konfigurasi Worker PDF.js
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                    
+                    // 1. Ubah Base64 ke Format Array untuk PDF.js
+                    const pdfData = atob(result.pdfBase64);
+                    const uint8Array = new Uint8Array(pdfData.length);
+                    for (let i = 0; i < pdfData.length; i++) {
+                        uint8Array[i] = pdfData.charCodeAt(i);
+                    }
+                    
+                    try {
+                        // 2. Baca Dokumen PDF di memori browser
+                        const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
+                        const pdf = await loadingTask.promise;
+                        const page = await pdf.getPage(1); // Ambil halaman pertama
+                        
+                        // 3. SETTING RESOLUSI TINGGI (Scale 3.0 = Resolusi 300%)
+                        // Ini memastikan tulisan setajam vektor walau dicetak sebagai gambar
+                        const scale = 7.0; 
+                        const viewport = page.getViewport({ scale: scale });
+                        
+                        // 4. Siapkan Canvas Virtual (Tidak terlihat di layar)
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        
+                        // 5. Render PDF dengan sempurna ke Canvas
+                        const renderContext = {
+                            canvasContext: context,
+                            viewport: viewport
+                        };
+                        await page.render(renderContext).promise;
+                        
+                        // 6. Konversi hasil render ke gambar PNG beresolusi tinggi
+                        const highResImageURL = canvas.toDataURL('image/png');
+                        
+                        // 7. Tutup Modal Loading
+                        closeGreetingModal();
+                        
+                        // 8. OPAR KE FUNGSI PRINT GAMBAR BAWAAN ANDA!
+                        handlePrintImage('Kartu Ucapan Omiyage', highResImageURL);
+                        
+                    } catch (renderError) {
+                        console.error('Error saat merender PDF ke Gambar:', renderError);
+                        alert('Gagal merender dokumen untuk dicetak.');
+                        closeGreetingModal();
+                    }
+                    
                 } else {
-                    showToast('Gagal memproses kartu: ' + result.message, 'error');
+                    alert('Gagal memproses kartu: ' + result.message);
+                    closeGreetingModal();
                 }
+                    
+               
             } catch (error) {
                 showToast('Terjadi kesalahan cuy.', 'error');
                 console.error(error);

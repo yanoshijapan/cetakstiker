@@ -3,23 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Percetakan Duniawi </title>
-    
+    <title>Percetakan Duniawi</title>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
+    <!-- Google Fonts: Space Grotesk (display) + Plus Jakarta Sans (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
-    <style>
-        .accordion-content {
-            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        ink: '#161F36',
+                        ink2: '#1F2A47',
+                        paper: '#FAF6EE',
+                        card: '#FFFFFF',
+                        stamp: '#D6435A',
+                        stampDark: '#B22F45',
+                        stampSoft: '#FBE7EA',
+                        gold: '#C6972E',
+                        goldSoft: '#F6ECD3',
+                        slate: '#667085',
+                    },
+                    boxShadow: {
+                        soft: '0 2px 10px -2px rgba(22,31,54,0.06)',
+                        lift: '0 18px 30px -12px rgba(22,31,54,0.18)',
+                    }
+                }
+            }
         }
+    </script>
+
+    <style>
+        :root { --paper: #FAF6EE; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--paper);
+            background-image: radial-gradient(rgba(22,31,54,0.055) 1px, transparent 1px);
+            background-size: 18px 18px;
+        }
+
+        /* Accordion */
+        .accordion-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            opacity: 0;
+            transition: grid-template-rows 0.42s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease-in-out;
+        }
+        .accordion-content > div { overflow: hidden; min-height: 0; }
         .accordion-content.open {
-            max-height: 600px;
+            grid-template-rows: 1fr;
             opacity: 1;
         }
+
         .hidden-iframe {
             position: absolute;
             width: 0;
@@ -27,269 +76,560 @@
             border: none;
             visibility: hidden;
         }
+
+        /* Torn receipt edge (signature motif) */
+        .tear-edge-ink {
+            height: 10px;
+            background-image:
+                linear-gradient(-45deg, #161F36 8px, transparent 0),
+                linear-gradient(45deg, #161F36 8px, transparent 0);
+            background-size: 16px 16px;
+            background-position: left bottom;
+            background-repeat: repeat-x;
+        }
+        .tear-edge-paper {
+            height: 10px;
+            background-image:
+                linear-gradient(-45deg, var(--paper) 8px, transparent 0),
+                linear-gradient(45deg, var(--paper) 8px, transparent 0);
+            background-size: 16px 16px;
+            background-position: left top;
+            background-repeat: repeat-x;
+        }
+        .tear-edge-card {
+            height: 8px;
+            background-image:
+                linear-gradient(-45deg, #FFFFFF 7px, transparent 0),
+                linear-gradient(45deg, #FFFFFF 7px, transparent 0);
+            background-size: 14px 14px;
+            background-position: left top;
+            background-repeat: repeat-x;
+        }
+
+        /* Ticket spine label */
+        .spine-label {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            letter-spacing: 0.18em;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D8CFB6; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #C2B698; }
+
+        /* Focus visibility */
+        a:focus-visible, button:focus-visible, input:focus-visible {
+            outline: 2px solid #C6972E;
+            outline-offset: 2px;
+        }
+
+        .print-item.is-hidden { display: none !important; }
+        .section-block.is-hidden { display: none !important; }
+
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateY(10px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .toast-anim { animation: toast-in 0.25s ease-out; }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex">
+<body class="text-ink antialiased min-h-screen flex selection:bg-goldSoft selection:text-gold font-sans">
 
-    <aside class="w-64 bg-white shadow-lg flex flex-col hidden md:flex">
-        <div class="p-6 border-b border-gray-100">
-            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Percetakan<span class="text-blue-600">Duniawi</span></h1>
-            <p class="text-xs text-gray-500 mt-1">Catak aneka macam</p>
+    <!-- Sidebar -->
+    <aside class="w-72 bg-gradient-to-b from-ink to-ink2 flex-col hidden md:flex z-20 relative shadow-2xl">
+        <div class="px-7 pt-9 pb-6 flex items-center flex-col text-center">
+            <div class="w-16 h-16 rounded-2xl bg-stamp/15 border border-stamp/30 flex items-center justify-center mb-4 relative">
+                <i class="fas fa-print text-2xl text-stamp"></i>
+                <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-gold border-2 border-ink"></span>
+            </div>
+            <h1 class="text-xl font-display font-bold text-white tracking-tight leading-tight">Percetakan<br><span class="text-stamp">Duniawi</span></h1>
+            <p class="text-[11px] font-semibold text-white/40 mt-2 uppercase tracking-[0.2em]">cetak cetak yanoshi</p>
         </div>
-        <nav class="flex-1 p-4">
-            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Menu Utama</p>
-            <ul class="space-y-2">
-                <li>
-                    <a href="#" class="flex items-center p-3 bg-blue-50 text-blue-700 rounded-lg font-medium">
-                        <i class="fas fa-print w-5 h-5 mr-3"></i> Cetak Stiker
-                    </a>
-                </li>
-            </ul>
-        </nav>
+
+        <div class="tear-edge-ink"></div>
+
+        
+
+        <div class="px-6 pb-7 pt-4 mt-auto">
+            <div id="statCount" class="flex items-center justify-between px-4 py-3 bg-white/[0.05] rounded-xl border border-white/10 mb-3">
+                <span class="text-[11px] font-semibold text-white/45 uppercase tracking-wide">Total Cetakan</span>
+                <span id="itemCountValue" class="text-sm font-display font-bold text-white">—</span>
+            </div>
+            <div class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white/[0.04] rounded-xl border border-white/10">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                </span>
+                <span class="text-xs font-bold text-white/70">Sistem Online</span>
+            </div>
+        </div>
     </aside>
 
-    <main class="flex-1 flex flex-col">
-        <header class="bg-white shadow-sm p-4 md:p-6 flex justify-between items-center">
-            <h2 class="text-xl font-semibold text-gray-800">Panel Pencetakan</h2>
-            <div class="flex items-center text-sm text-gray-500">
-                <i class="fas fa-circle text-green-500 w-3 h-3 mr-2"></i> Server Aktif
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col w-full overflow-hidden relative">
+
+        <!-- Header Mobile -->
+        <header class="bg-ink p-5 flex md:hidden justify-between items-center z-20 relative">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-lg bg-stamp/15 border border-stamp/30 flex items-center justify-center">
+                    <i class="fas fa-print text-stamp text-sm"></i>
+                </div>
+                <h1 class="text-base font-display font-bold text-white tracking-tight">Percetakan<span class="text-stamp">Duniawi</span></h1>
+            </div>
+            <div class="flex items-center text-[11px] font-bold text-white/70 bg-white/10 px-3 py-1.5 rounded-full">
+                <i class="fas fa-circle text-emerald-400 w-2 h-2 mr-2 animate-pulse"></i> Aktif
             </div>
         </header>
+        <div class="tear-edge-ink md:hidden"></div>
 
-        <div class="p-4 md:p-8 flex-1 overflow-y-auto">
-            <div class="max-w-4xl mx-auto space-y-6">
+        <!-- Search & Filter Bar -->
+        <div class="bg-card/90 backdrop-blur border-b border-ink/5 px-4 md:px-8 py-4 sticky top-0 z-10 shadow-soft">
+            <div class="max-w-5xl mx-auto flex flex-col sm:flex-row gap-3 sm:items-center">
+                <div class="relative flex-1">
+                    <i class="fas fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate text-sm"></i>
+                    <input id="searchInput" type="text" placeholder="Cari item cetak… misal: KP 3, fragile, alamat"
+                        class="w-full pl-11 pr-10 py-2.5 bg-paper border border-ink/10 rounded-xl text-sm font-semibold text-ink placeholder-slate/60 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all">
+                    <button id="clearSearch" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate hover:text-stamp transition-colors">
+                        <i class="fas fa-circle-xmark"></i>
+                    </button>
+                </div>
+                <div class="flex gap-2 overflow-x-auto no-scrollbar">
+                    <a href="#sec-kp" class="shrink-0 px-3.5 py-2 rounded-lg bg-stampSoft text-stampDark text-xs font-bold hover:bg-stamp hover:text-white transition-colors">Kakejiku KP</a>
+                    <a href="#sec-kd" class="shrink-0 px-3.5 py-2 rounded-lg bg-goldSoft text-gold text-xs font-bold hover:bg-gold hover:text-white transition-colors">Kakejiku KD</a>
+                    <a href="#sec-satuan" class="shrink-0 px-3.5 py-2 rounded-lg bg-ink/[0.06] text-ink/70 text-xs font-bold hover:bg-ink hover:text-white transition-colors">Cetak Lainnya</a>
+                </div>
+            </div>
+            <p id="searchStatus" class="hidden max-w-5xl mx-auto text-xs font-semibold text-slate mt-2.5"></p>
+        </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <button onclick="toggleAccordion('kakejiku-kp-menu', 'kakejiku-kp-icon')" class="w-full flex justify-between items-center p-6 bg-white hover:bg-gray-50 transition-colors focus:outline-none">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
-                                <i class="fas fa-scroll"></i>
+        <!-- Container Dashboard -->
+        <div id="katalog" class="p-4 md:p-8 flex-1 overflow-y-auto break-words scroll-mt-24">
+            <div class="max-w-5xl mx-auto space-y-6 pb-10">
+
+                <div class="mb-2">
+                    <h2 class="text-2xl md:text-3xl font-display font-bold text-ink">Mau Cetak Apa?</h2>
+                    <p class="text-slate mt-1.5 text-sm">Pilih aja di pilih.</p>
+                </div>
+
+                <!-- Kakejiku KP Accordion -->
+                <div id="sec-kp" class="section-block bg-card rounded-2xl shadow-soft border border-ink/5 overflow-hidden hover:shadow-lift transition-shadow duration-300 scroll-mt-28">
+                    <div class="flex">
+                        <div class="w-11 shrink-0 bg-stamp flex items-center justify-center">
+                            <span class="spine-label text-[10px] font-bold text-white/90">PREMIUM</span>
+                        </div>
+                        <button onclick="toggleAccordion('kakejiku-kp-menu', 'kakejiku-kp-icon')" class="flex-1 flex justify-between items-center p-5 md:p-6 hover:bg-paper/60 transition-colors focus:outline-none group text-left">
+                            <div class="flex items-center min-w-0">
+                                <div class="w-11 h-11 shrink-0 rounded-xl bg-stampSoft flex items-center justify-center text-stamp mr-4 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-scroll text-lg"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h3 class="text-base md:text-lg font-display font-bold text-ink truncate">Stiker Kakejiku KP</h3>
+                                    <p class="text-xs md:text-sm text-slate mt-0.5">Koleksi varian seri KP · <span id="kpCount" class="font-semibold"></span></p>
+                                </div>
                             </div>
-                            <h3 class="text-lg font-semibold text-gray-800 text-left">Cetak Stiker Kakejiku KP (Premium)</h3>
-                        </div>
-                        <i id="kakejiku-kp-icon" class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    
-                    <div id="kakejiku-kp-menu" class="accordion-content bg-gray-50 border-t border-gray-100">
-                        <div class="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                            <script>
-                                const kpList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13];
-                
-                                kpList.forEach(num => {
-                                    const imgPath = `./img/kp${num}.jpg`; 
-                                    
-                                    document.write(`
-                                        <button onclick="handlePrintImage('KP${num}', '${imgPath}')" 
-                                            class="py-2 px-4 bg-white border border-gray-200 text-gray-700 rounded-lg hover:border-blue-500 hover:text-blue-600 hover:shadow-md transition-all text-sm font-medium flex justify-between items-center group">
-                                            <span>KP ${num}</span>
-                                            <i class="fas fa-print opacity-0 group-hover:opacity-100 transition-opacity"></i>
-                                        </button>
-                                    `);
-                                });
-                            </script>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <button onclick="toggleAccordion('kakejiku-kd-menu', 'kakejiku-kd-icon')" class="w-full flex justify-between items-center p-6 bg-white hover:bg-gray-50 transition-colors focus:outline-none">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mr-4">
-                                <i class="fas fa-scroll"></i>
+                            <div class="w-8 h-8 shrink-0 rounded-full bg-paper flex items-center justify-center ml-3">
+                                <i id="kakejiku-kp-icon" class="fas fa-chevron-down text-slate text-sm transition-transform duration-300"></i>
                             </div>
-                            <h3 class="text-lg font-semibold text-gray-800 text-left">Cetak Stiker Kakejiku KD (Deluxe)</h3>
-                        </div>
-                        <i id="kakejiku-kd-icon" class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    
-                    <div id="kakejiku-kd-menu" class="accordion-content bg-gray-50 border-t border-gray-100">
-                        <div class="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                            <script>
-                                const kdList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-                
-                                // MENGGUNAKAN kdList.forEach, bukan kpList
-                                kdList.forEach(num => {
-                                    const imgPath = `./img/kd${num}.jpg`; 
-                                    
-                                    document.write(`
-                                        <button onclick="handlePrintImage('KD${num}', '${imgPath}')" 
-                                            class="py-2 px-4 bg-white border border-gray-200 text-gray-700 rounded-lg hover:border-indigo-500 hover:text-indigo-600 hover:shadow-md transition-all text-sm font-medium flex justify-between items-center group">
-                                            <span>KD ${num}</span>
-                                            <i class="fas fa-print opacity-0 group-hover:opacity-100 transition-opacity"></i>
-                                        </button>
-                                    `);
-                                });
-                            </script>
-                        </div>
+                        </button>
                     </div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex justify-between items-center hover:shadow-md transition-shadow">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 mr-4">
-                            <i class="fas fa-wine-glass-alt"></i>
-                        </div>
+                    <div id="kakejiku-kp-menu" class="accordion-content border-t border-ink/5">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Cetak Stiker Fragile</h3>
-                            <p class="text-sm text-gray-500">Peringatan barang mudah pecah</p>
+                            <div id="kpGrid" class="p-5 md:p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
                         </div>
                     </div>
-                    <button onclick="handlePrintImage('Fragile', './img/fragile.jpg')" class="px-5 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium flex items-center">
-                        <i class="fas fa-print mr-2"></i> Cetak
-                    </button>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex justify-between items-center hover:shadow-md transition-shadow">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 mr-4">
-                            <i class="fas fa-box-open"></i>
+                <!-- Kakejiku KD Accordion -->
+                <div id="sec-kd" class="section-block bg-card rounded-2xl shadow-soft border border-ink/5 overflow-hidden hover:shadow-lift transition-shadow duration-300 scroll-mt-28">
+                    <div class="flex">
+                        <div class="w-11 shrink-0 bg-gold flex items-center justify-center">
+                            <span class="spine-label text-[10px] font-bold text-white/90">DELUXE</span>
                         </div>
+                        <button onclick="toggleAccordion('kakejiku-kd-menu', 'kakejiku-kd-icon')" class="flex-1 flex justify-between items-center p-5 md:p-6 hover:bg-paper/60 transition-colors focus:outline-none group text-left">
+                            <div class="flex items-center min-w-0">
+                                <div class="w-11 h-11 shrink-0 rounded-xl bg-goldSoft flex items-center justify-center text-gold mr-4 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-scroll text-lg"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h3 class="text-base md:text-lg font-display font-bold text-ink truncate">Stiker Kakejiku KD</h3>
+                                    <p class="text-xs md:text-sm text-slate mt-0.5">Koleksi varian seri KD · <span id="kdCount" class="font-semibold"></span></p>
+                                </div>
+                            </div>
+                            <div class="w-8 h-8 shrink-0 rounded-full bg-paper flex items-center justify-center ml-3">
+                                <i id="kakejiku-kd-icon" class="fas fa-chevron-down text-slate text-sm transition-transform duration-300"></i>
+                            </div>
+                        </button>
+                    </div>
+                    <div id="kakejiku-kd-menu" class="accordion-content border-t border-ink/5">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Cetak Stiker Unboxing</h3>
-                            <p class="text-sm text-gray-500">Instruksi video unboxing paket Omiyage</p>
+                            <div id="kdGrid" class="p-5 md:p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
                         </div>
                     </div>
-                    <button onclick="handlePrintImage('Unboxing', './img/unboxing.jpg')" class="px-5 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium flex items-center">
-                        <i class="fas fa-print mr-2"></i> Cetak
-                    </button>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex justify-between items-center hover:shadow-md transition-shadow">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 mr-4">
-                            <i class="fas fa-box-open"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Cetak Kartu Ucapan Omiyage</h3>
-                            <p class="text-sm text-gray-500">Kartu ucapan paket kosongan</p>
-                        </div>
-                    </div>
-                    <button onclick="handlePrintImage('Unboxing', './img/greeting.jpg')" class="px-5 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium flex items-center">
-                        <i class="fas fa-print mr-2"></i> Cetak
-                    </button>
+                <!-- Grid Item Satuan -->
+                <div id="sec-satuan" class="scroll-mt-28">
+                    <p class="text-[11px] font-bold text-slate uppercase tracking-[0.15em] mb-3 pl-1">Item Satuan &amp; Kartu Ucapan</p>
+                    <div id="singleGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex justify-between items-center hover:shadow-md transition-shadow">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 mr-4">
-                            <i class="fas fa-box-open"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Cetak Intruksi Tempel</h3>
-                            <p class="text-sm text-gray-500">Intruksi tempelan kakejiku</p>
-                        </div>
-                    </div>
-                    <button onclick="handlePrintImage('Unboxing', './img/cetakintruksitempel.jpg')" class="px-5 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium flex items-center">
-                        <i class="fas fa-print mr-2"></i> Cetak
-                    </button>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex justify-between items-center hover:shadow-md transition-shadow">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 mr-4">
-                            <i class="fas fa-box-open"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Cetak Alamat Omiyage Manual</h3>
-                            <p class="text-sm text-gray-500">Alamat omiyage isi manual</p>
-                        </div>
-                    </div>
-                    <button onclick="handlePrintImage('Unboxing', './img/alamat.jpg')" class="px-5 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium flex items-center">
-                        <i class="fas fa-print mr-2"></i> Cetak
-                    </button>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex justify-between items-center hover:shadow-md transition-shadow">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 mr-4">
-                            <i class="fas fa-box-open"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Cetak Background Ganci Neko</h3>
-                            <p class="text-sm text-gray-500">Background ganci neko gold</p>
-                        </div>
-                    </div>
-                    <button onclick="handlePrintImage('Unboxing', './img/bgneko.png')" class="px-5 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium flex items-center">
-                        <i class="fas fa-print mr-2"></i> Cetak
-                    </button>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex justify-between items-center hover:shadow-md transition-shadow">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 mr-4">
-                            <i class="fas fa-box-open"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Cetak Alamat Jastip Manual</h3>
-                            <p class="text-sm text-gray-500">Alamat jastip isi manual</p>
-                        </div>
-                    </div>
-                    <button onclick="handlePrintImage('Unboxing', './img/alamatjs.jpg')" class="px-5 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium flex items-center">
-                        <i class="fas fa-print mr-2"></i> Cetak
-                    </button>
-                </div>
-
+                <p id="noResults" class="hidden text-center py-14 text-slate">
+                    <i class="fas fa-receipt text-3xl text-ink/15 block mb-3"></i>
+                    Tidak ada item cetak yang cocok dengan pencarian.
+                </p>
             </div>
         </div>
+
+        <!-- Modal Popup Kartu Ucapan -->
+        <div id="greetingModal" class="fixed inset-0 bg-ink/70 backdrop-blur-sm hidden z-50 flex justify-center items-center transition-all duration-300 opacity-0 pointer-events-none p-4">
+            <div class="bg-card rounded-2xl shadow-2xl w-full max-w-xl relative transform scale-95 transition-transform duration-300 overflow-hidden" id="modalContent">
+                <div class="bg-gradient-to-r from-ink to-ink2 px-8 pt-6 pb-5 relative">
+                    <button onclick="closeGreetingModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-stamp hover:text-white transition-colors">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/10 text-gold flex items-center justify-center">
+                            <i class="fas fa-envelope-open-text text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-display font-bold text-white">Tulis Nama Customernya</h2>
+                            <p class="text-[11px] text-white/50 font-medium">Ga harus di isi semua</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tear-edge-card"></div>
+
+                <div class="p-8 pt-6">
+                    <p class="text-sm text-slate mb-6 font-medium">Isi nama buat dicetak di kartu ucapan. Kosongin aja kalo ga ada namanya, nanti kartunya otomatis kosong.</p>
+
+                    <div id="namaFieldsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8"></div>
+
+                    <button id="btnProsesCetak" onclick="processGreetingCard()" class="w-full py-3.5 bg-ink text-white rounded-xl hover:bg-stamp transition-colors font-bold flex justify-center items-center shadow-lg hover:shadow-xl group">
+                        <span id="btnText" class="flex items-center"><i class="fas fa-wand-magic-sparkles mr-2 group-hover:animate-bounce"></i> Generate &amp; Cetak Kartu</span>
+                        <div id="btnLoading" class="hidden items-center">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Tunggu ya lagi di bikin…
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toastContainer" class="fixed bottom-5 right-5 z-[60] flex flex-col gap-2.5 items-end"></div>
     </main>
 
     <iframe id="printFrame" class="hidden-iframe"></iframe>
 
     <script>
-        // Fungsi untuk buka-tutup menu Kakejiku
+        // ====== DATA KATALOG ======
+        const kpList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13];
+        const kdList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+
+        const singleItems = [
+            { title: 'Kartu Ucapan Omiyage', desc: 'Template otomatis, isi namanya dulu', icon: 'fa-pen-nib', color: 'bg-goldSoft text-gold', isModal: true },
+            { title: 'Stiker Fragile', desc: 'Fragile bahasa Jepang', icon: 'fa-wine-glass-alt', color: 'bg-stampSoft text-stamp', img: './img/fragile.jpg' },
+            { title: 'Stiker Unboxing', desc: 'Instruksi video unboxing', icon: 'fa-box-open', color: 'bg-goldSoft text-gold', img: './img/unboxing.jpg' },
+            { title: 'Instruksi Tempelan', desc: 'Panduan pemasangan kakejiku', icon: 'fa-paste', color: 'bg-ink/[0.06] text-ink/70', img: './img/cetakintruksitempel.jpg' },
+            { title: 'Alamat Omiyage Manual', desc: 'Lembar alamat kosongan', icon: 'fa-map-location-dot', color: 'bg-stampSoft text-stamp', img: './img/alamat.jpg' },
+            { title: 'Alamat Jastip', desc: 'Format khusus jastip', icon: 'fa-plane-departure', color: 'bg-goldSoft text-gold', img: './img/alamatjs.jpg' },
+            { title: 'BG Ganci Neko', desc: 'Latar belakang ganci kucing', icon: 'fa-cat', color: 'bg-ink/[0.06] text-ink/70', img: './img/bgneko.png' }
+        ];
+
+        // ====== RENDER: Kakejiku KP ======
+        const kpGrid = document.getElementById('kpGrid');
+        kpList.forEach(num => {
+            const imgPath = `./img/kp${num}.jpg`;
+            const btn = document.createElement('button');
+            btn.className = 'print-item py-3 px-4 bg-paper border border-ink/10 text-ink rounded-xl hover:border-stamp hover:text-stamp hover:bg-white hover:shadow-lift hover:-translate-y-1 transition-all duration-300 text-sm font-bold flex justify-between items-center group';
+            btn.setAttribute('data-search', `kp ${num} kakejiku premium`);
+            btn.onclick = () => handlePrintImage(`KP${num}`, imgPath);
+            btn.innerHTML = `<span>KP ${num}</span><i class="fas fa-print opacity-0 group-hover:opacity-100 transition-opacity text-stamp"></i>`;
+            kpGrid.appendChild(btn);
+        });
+        document.getElementById('kpCount').textContent = `${kpList.length} varian`;
+
+        // ====== RENDER: Kakejiku KD ======
+        const kdGrid = document.getElementById('kdGrid');
+        kdList.forEach(num => {
+            const imgPath = `./img/kd${num}.jpg`;
+            const btn = document.createElement('button');
+            btn.className = 'print-item py-3 px-4 bg-paper border border-ink/10 text-ink rounded-xl hover:border-gold hover:text-gold hover:bg-white hover:shadow-lift hover:-translate-y-1 transition-all duration-300 text-sm font-bold flex justify-between items-center group';
+            btn.setAttribute('data-search', `kd ${num} kakejiku deluxe`);
+            btn.onclick = () => handlePrintImage(`KD${num}`, imgPath);
+            btn.innerHTML = `<span>KD ${num}</span><i class="fas fa-print opacity-0 group-hover:opacity-100 transition-opacity text-gold"></i>`;
+            kdGrid.appendChild(btn);
+        });
+        document.getElementById('kdCount').textContent = `${kdList.length} varian`;
+
+        // ====== RENDER: Item Satuan (+ Kartu Ucapan) ======
+        const singleGrid = document.getElementById('singleGrid');
+        singleItems.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'print-item bg-card rounded-2xl shadow-soft border border-ink/5 p-5 md:p-6 flex justify-between items-center hover:shadow-lift hover:-translate-y-1 transition-all duration-300 group';
+            card.setAttribute('data-search', `${item.title} ${item.desc}`.toLowerCase());
+
+            const action = item.isModal
+                ? `<button class="px-5 py-2.5 bg-ink text-white rounded-xl hover:bg-stamp transition-colors font-semibold flex items-center shadow-md text-sm"><i class="fas fa-pen-nib mr-2"></i> Buat</button>`
+                : `<button class="w-10 h-10 bg-paper text-ink/60 rounded-full hover:bg-ink hover:text-white transition-colors flex items-center justify-center shadow-sm shrink-0"><i class="fas fa-print"></i></button>`;
+
+            card.innerHTML = `
+                <div class="flex items-center min-w-0">
+                    <div class="w-12 h-12 shrink-0 rounded-xl ${item.color} flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas ${item.icon} text-xl"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="text-base font-display font-bold text-ink truncate">${item.title}</h3>
+                        <p class="text-xs text-slate font-medium mt-0.5 truncate">${item.desc}</p>
+                    </div>
+                </div>
+            `;
+            card.insertAdjacentHTML('beforeend', action);
+            const actionBtn = card.querySelector('button');
+            actionBtn.addEventListener('click', () => {
+                if (item.isModal) openGreetingModal();
+                else handlePrintImage(item.title, item.img);
+            });
+
+            singleGrid.appendChild(card);
+        });
+
+        document.getElementById('itemCountValue').textContent = kpList.length + kdList.length + singleItems.length;
+
+        // ====== RENDER: Form Nama Kartu Ucapan ======
+        const namaFieldsGrid = document.getElementById('namaFieldsGrid');
+        for (let i = 1; i <= 8; i++) {
+            const wrap = document.createElement('div');
+            wrap.className = 'relative';
+            wrap.innerHTML = `
+                <label class="text-[10px] font-bold text-slate/70 uppercase tracking-wider absolute -top-2 left-3 bg-card px-1">Nama ${i}</label>
+                <input type="text" id="nama${i}" class="w-full p-3 pt-3.5 border border-ink/10 rounded-xl focus:ring-2 focus:ring-gold/40 focus:border-gold focus:outline-none transition-all text-sm font-semibold text-ink bg-paper focus:bg-white placeholder-slate/40" placeholder="Ketik nama…">
+            `;
+            namaFieldsGrid.appendChild(wrap);
+        }
+
+        // ====== ACCORDION ======
         function toggleAccordion(menuId, iconId) {
             const menu = document.getElementById(menuId);
             const icon = document.getElementById(iconId);
-            
             menu.classList.toggle('open');
-            if (menu.classList.contains('open')) {
-                icon.style.transform = "rotate(180deg)";
-            } else {
-                icon.style.transform = "rotate(0deg)";
-            }
+            icon.style.transform = menu.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
         }
 
-        // Fungsi KHUSUS Eksekusi Print GAMBAR
+        // ====== TOAST NOTIFICATIONS ======
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const styles = {
+                success: { icon: 'fa-circle-check', ring: 'border-emerald-200', dot: 'text-emerald-500' },
+                error:   { icon: 'fa-triangle-exclamation', ring: 'border-stamp/30', dot: 'text-stamp' },
+                info:    { icon: 'fa-print', ring: 'border-gold/30', dot: 'text-gold' },
+            };
+            const s = styles[type] || styles.info;
+            const toast = document.createElement('div');
+            toast.className = `toast-anim flex items-center gap-3 bg-card border ${s.ring} shadow-lift rounded-xl px-4 py-3 max-w-xs`;
+            toast.innerHTML = `<i class="fas ${s.icon} ${s.dot}"></i><span class="text-sm font-semibold text-ink">${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.3s, transform 0.3s';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        // ====== PRINT GAMBAR ======
         function handlePrintImage(namaStiker, imgUrl) {
+            showToast(`OTW nyetak: ${namaStiker}`, 'info');
             const iframe = document.getElementById('printFrame');
             const doc = iframe.contentWindow.document;
-            
-            // Kita membuat dokumen HTML baru di dalam iframe khusus untuk gambar ini
+
             doc.open();
             doc.write(`
                 <html>
                     <head>
                         <title>Print - ${namaStiker}</title>
                         <style>
-                            /* Menghilangkan header & footer otomatis dari browser */
                             @page { margin: 0; }
-                            body { 
-                                margin: 0; 
-                                display: flex; 
-                                justify-content: center; 
-                                align-items: center; 
+                            body {
+                                margin: 0;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                background-color: white;
                             }
-                            img { 
-                                max-width: 100%; 
-                                max-height: 100vh; 
-                                object-fit: contain; 
+                            img {
+                                max-width: 100%;
+                                max-height: 100vh;
+                                object-fit: contain;
                             }
                         </style>
                     </head>
                     <body>
-                        <img src="${imgUrl}" onload="window.print();" onerror="alert('Gambar tidak ditemukan di folder! Pastikan nama file dan foldernya benar.');" />
+                        <img src="${imgUrl}" onload="window.print();" onerror="window.parent.showToast('Gambar ${namaStiker} tidak ditemukan di folder img/', 'error');" />
                     </body>
                 </html>
             `);
             doc.close();
         }
+
+        // ====== KONFIGURASI GOOGLE APPS SCRIPT ======
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwuQomNn42chOeSWKGgkH6fWyvi4qDQSm5BWaBMMgVsQht3ouxRF497cr5DfppcOHyl/exec';
+
+        const modal = document.getElementById('greetingModal');
+        const modalContent = document.getElementById('modalContent');
+
+        function openGreetingModal() {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+            setTimeout(() => document.getElementById('nama1')?.focus(), 200);
+        }
+
+        function closeGreetingModal() {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                for (let i = 1; i <= 8; i++) {
+                    const el = document.getElementById('nama' + i);
+                    if (el) el.value = '';
+                }
+            }, 300);
+        }
+
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeGreetingModal(); });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeGreetingModal();
+        });
+
+        async function processGreetingCard() {
+            const btn = document.getElementById('btnProsesCetak');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+
+            let payload = {};
+            for (let i = 1; i <= 8; i++) {
+                payload['nama' + i] = document.getElementById('nama' + i).value;
+            }
+
+            btn.disabled = true;
+            btn.classList.add('opacity-90', 'cursor-not-allowed');
+            btnText.classList.add('hidden');
+            btnLoading.classList.remove('hidden');
+            btnLoading.classList.add('flex');
+
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showToast('Kartu ucapannya udah jadi', 'success');
+                    closeGreetingModal();
+                    handlePrintImage('Kartu Ucapan Personalisasi', result.image);
+                } else {
+                    showToast('Gagal memproses kartu: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showToast('Terjadi kesalahan cuy.', 'error');
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-90', 'cursor-not-allowed');
+                btnText.classList.remove('hidden');
+                btnLoading.classList.add('hidden');
+                btnLoading.classList.remove('flex');
+            }
+        }
+
+        // ====== SEARCH & FILTER ======
+        const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearch');
+        const searchStatus = document.getElementById('searchStatus');
+        const noResults = document.getElementById('noResults');
+        const allPrintItems = () => Array.from(document.querySelectorAll('.print-item'));
+        const allSections = () => Array.from(document.querySelectorAll('.section-block'));
+
+        function runSearch() {
+            const q = searchInput.value.trim().toLowerCase();
+            clearSearchBtn.classList.toggle('hidden', q.length === 0);
+
+            if (!q) {
+                allPrintItems().forEach(el => el.classList.remove('is-hidden'));
+                allSections().forEach(el => el.classList.remove('is-hidden'));
+                searchStatus.classList.add('hidden');
+                noResults.classList.add('hidden');
+                document.getElementById('kakejiku-kp-menu').classList.remove('open');
+                document.getElementById('kakejiku-kd-menu').classList.remove('open');
+                document.getElementById('kakejiku-kp-icon').style.transform = 'rotate(0deg)';
+                document.getElementById('kakejiku-kd-icon').style.transform = 'rotate(0deg)';
+                return;
+            }
+
+            let visibleCount = 0;
+            allSections().forEach(section => {
+                const items = Array.from(section.querySelectorAll('.print-item, [data-search]'));
+                const itemsToCheck = items.length ? items : [section];
+                let sectionHasMatch = false;
+
+                itemsToCheck.forEach(el => {
+                    const haystack = el.getAttribute('data-search') || el.textContent.toLowerCase();
+                    const match = haystack.toLowerCase().includes(q);
+                    if (el.classList.contains('print-item')) el.classList.toggle('is-hidden', !match);
+                    if (match) sectionHasMatch = true;
+                });
+
+                section.classList.toggle('is-hidden', !sectionHasMatch);
+                if (sectionHasMatch) visibleCount++;
+
+                const menu = section.querySelector('.accordion-content');
+                if (menu && sectionHasMatch) {
+                    menu.classList.add('open');
+                    const icon = section.querySelector('[id$="-icon"]');
+                    if (icon) icon.style.transform = 'rotate(180deg)';
+                }
+            });
+
+            const singleCards = Array.from(document.querySelectorAll('#singleGrid .print-item'));
+            let singleVisible = 0;
+            singleCards.forEach(card => {
+                const match = (card.getAttribute('data-search') || '').includes(q);
+                card.classList.toggle('is-hidden', !match);
+                if (match) singleVisible++;
+            });
+
+            const totalVisible = visibleCount + singleVisible;
+            noResults.classList.toggle('hidden', totalVisible > 0);
+            searchStatus.classList.remove('hidden');
+            searchStatus.textContent = totalVisible > 0
+                ? `Menampilkan hasil untuk "${searchInput.value.trim()}"`
+                : `Tidak ditemukan hasil untuk "${searchInput.value.trim()}"`;
+        }
+
+        searchInput.addEventListener('input', runSearch);
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            runSearch();
+            searchInput.focus();
+        });
     </script>
 </body>
-
 </html>
-
-
-
-
-
-

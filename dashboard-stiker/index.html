@@ -7,9 +7,9 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-		
-		<!-- Library PDF.js -->
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+        
+    <!-- Library PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
     <!-- Google Fonts: Space Grotesk (display) + Plus Jakarta Sans (body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -156,8 +156,6 @@
         </div>
 
         <div class="tear-edge-ink"></div>
-
-        
 
         <div class="px-6 pb-7 pt-4 mt-auto">
             <div id="statCount" class="flex items-center justify-between px-4 py-3 bg-white/[0.05] rounded-xl border border-white/10 mb-3">
@@ -326,6 +324,66 @@
                 </div>
             </div>
         </div>
+                
+        <!-- Modal Popup Stiker Alamat -->
+        <div id="alamatModal" class="fixed inset-0 bg-ink/70 backdrop-blur-sm hidden z-50 flex justify-center items-center transition-all duration-300 opacity-0 pointer-events-none p-4">
+            <div class="bg-card rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col relative transform scale-95 transition-transform duration-300" id="alamatModalContent">
+                
+                <!-- Header Modal -->
+                <div class="bg-gradient-to-r from-ink to-ink2 p-6 flex justify-between items-center rounded-t-2xl relative">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/10 text-stamp flex items-center justify-center">
+                            <i class="fas fa-map-location-dot text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-display font-bold text-white">Input Alamat Omiyage</h2>
+                            <p class="text-[11px] text-white/50 font-medium">Kosongin aja sisanya kalo customernya ga sampe 8.</p>
+                        </div>
+                    </div>
+                    <button onclick="closeAlamatModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-stamp hover:text-white transition-colors">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <!-- Body Scrollable -->
+                <div class="p-6 overflow-y-auto bg-paper flex-1">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Looping 8 Blok Kustomer via JS -->
+                        <script>
+                            for(let i=1; i<=8; i++) {
+                                document.write(`
+                                    <div class="bg-card p-5 rounded-xl border border-ink/10 shadow-soft relative pt-6">
+                                        <span class="absolute -top-3 left-4 bg-gold text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">KUSTOMER ${i}</span>
+                                        
+                                        <div class="grid grid-cols-2 gap-3 mb-3">
+                                            <div class="col-span-1"><input type="text" id="al_nama_${i}" class="w-full p-2.5 border border-ink/10 rounded-xl focus:ring-2 focus:ring-gold/40 focus:border-gold focus:outline-none text-sm font-semibold text-ink bg-paper focus:bg-white placeholder-slate/40" placeholder="Nama Penerima"></div>
+                                            <div class="col-span-1"><input type="text" id="al_nomor_${i}" class="w-full p-2.5 border border-ink/10 rounded-xl focus:ring-2 focus:ring-gold/40 focus:border-gold focus:outline-none text-sm font-semibold text-ink bg-paper focus:bg-white placeholder-slate/40" placeholder="Nomor HP"></div>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <input type="text" id="al_brs1_${i}" class="w-full p-2.5 border border-ink/10 rounded-xl focus:ring-1 focus:ring-gold/40 focus:outline-none text-xs font-medium text-ink bg-paper focus:bg-white placeholder-slate/40" placeholder="Alamat Baris 1">
+                                            <input type="text" id="al_brs2_${i}" class="w-full p-2.5 border border-ink/10 rounded-xl focus:ring-1 focus:ring-gold/40 focus:outline-none text-xs font-medium text-ink bg-paper focus:bg-white placeholder-slate/40" placeholder="Alamat Baris 2">
+                                            <input type="text" id="al_brs3_${i}" class="w-full p-2.5 border border-ink/10 rounded-xl focus:ring-1 focus:ring-gold/40 focus:outline-none text-xs font-medium text-ink bg-paper focus:bg-white placeholder-slate/40" placeholder="Alamat Baris 3">
+                                            <input type="text" id="al_brs4_${i}" class="w-full p-2.5 border border-ink/10 rounded-xl focus:ring-1 focus:ring-gold/40 focus:outline-none text-xs font-medium text-ink bg-paper focus:bg-white placeholder-slate/40" placeholder="Alamat Baris 4">
+                                        </div>
+                                    </div>
+                                `);
+                            }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- Footer Modal -->
+                <div class="p-6 border-t border-ink/10 bg-card rounded-b-2xl">
+                    <button id="btnProsesAlamat" onclick="processAlamatCard()" class="w-full py-3.5 bg-ink text-white rounded-xl hover:bg-gold transition-colors font-bold flex justify-center items-center shadow-lg group">
+                        <span id="btnTextAlamat" class="flex items-center"><i class="fas fa-magic mr-2 group-hover:animate-bounce"></i> Bikin Stiker Alamat</span>
+                        <div id="btnLoadingAlamat" class="hidden items-center">
+                            <i class="fas fa-spinner fa-spin mr-2"></i> Lagi di bikin, sabar...
+                        </div>
+                    </button>
+                </div>
+
+            </div>
+        </div>
 
         <!-- Toast Container -->
         <div id="toastContainer" class="fixed bottom-5 right-5 z-[60] flex flex-col gap-2.5 items-end"></div>
@@ -339,11 +397,11 @@
         const kdList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
         const singleItems = [
-            { title: 'Kartu Ucapan Omiyage', desc: 'Template otomatis, isi namanya dulu', icon: 'fa-pen-nib', color: 'bg-goldSoft text-gold', isModal: true },
+            { title: 'Kartu Ucapan Omiyage', desc: 'Template otomatis, isi namanya dulu', icon: 'fa-pen-nib', color: 'bg-goldSoft text-gold', modalType: 'greeting' },
             { title: 'Stiker Fragile', desc: 'Fragile bahasa Jepang', icon: 'fa-wine-glass-alt', color: 'bg-stampSoft text-stamp', img: './img/fragile.jpg' },
             { title: 'Stiker Unboxing', desc: 'Instruksi video unboxing', icon: 'fa-box-open', color: 'bg-goldSoft text-gold', img: './img/unboxing.jpg' },
             { title: 'Instruksi Tempelan', desc: 'Panduan pemasangan kakejiku', icon: 'fa-paste', color: 'bg-ink/[0.06] text-ink/70', img: './img/cetakintruksitempel.jpg' },
-            { title: 'Alamat Omiyage Manual', desc: 'Lembar alamat kosongan', icon: 'fa-map-location-dot', color: 'bg-stampSoft text-stamp', img: './img/alamat.jpg' },
+            { title: 'Alamat Omiyage Manual', desc: 'Template alamat 8 kustomer dinamis', icon: 'fa-map-location-dot', color: 'bg-stampSoft text-stamp', modalType: 'alamat' },
             { title: 'Alamat Jastip', desc: 'Format khusus jastip', icon: 'fa-plane-departure', color: 'bg-goldSoft text-gold', img: './img/alamatjs.jpg' },
             { title: 'BG Ganci Neko', desc: 'Latar belakang ganci kucing', icon: 'fa-cat', color: 'bg-ink/[0.06] text-ink/70', img: './img/bgneko.png' }
         ];
@@ -374,15 +432,15 @@
         });
         document.getElementById('kdCount').textContent = `${kdList.length} varian`;
 
-        // ====== RENDER: Item Satuan (+ Kartu Ucapan) ======
+        // ====== RENDER: Item Satuan (+ Kartu Ucapan & Alamat) ======
         const singleGrid = document.getElementById('singleGrid');
         singleItems.forEach(item => {
             const card = document.createElement('div');
             card.className = 'print-item bg-card rounded-2xl shadow-soft border border-ink/5 p-5 md:p-6 flex justify-between items-center hover:shadow-lift hover:-translate-y-1 transition-all duration-300 group';
             card.setAttribute('data-search', `${item.title} ${item.desc}`.toLowerCase());
 
-            const action = item.isModal
-                ? `<button class="px-5 py-2.5 bg-ink text-white rounded-xl hover:bg-stamp transition-colors font-semibold flex items-center shadow-md text-sm"><i class="fas fa-pen-nib mr-2"></i> Buat</button>`
+            const action = item.modalType
+                ? `<button class="px-5 py-2.5 bg-ink text-white rounded-xl hover:bg-gold transition-colors font-semibold flex items-center shadow-md text-sm"><i class="fas fa-pen-nib mr-2"></i> Buat</button>`
                 : `<button class="w-10 h-10 bg-paper text-ink/60 rounded-full hover:bg-ink hover:text-white transition-colors flex items-center justify-center shadow-sm shrink-0"><i class="fas fa-print"></i></button>`;
 
             card.innerHTML = `
@@ -398,9 +456,15 @@
             `;
             card.insertAdjacentHTML('beforeend', action);
             const actionBtn = card.querySelector('button');
+            
             actionBtn.addEventListener('click', () => {
-                if (item.isModal) openGreetingModal();
-                else handlePrintImage(item.title, item.img);
+                if (item.modalType === 'greeting') {
+                    openGreetingModal();
+                } else if (item.modalType === 'alamat') {
+                    openAlamatModal();
+                } else {
+                    handlePrintImage(item.title, item.img);
+                }
             });
 
             singleGrid.appendChild(card);
@@ -485,8 +549,46 @@
         }
 
         // ====== KONFIGURASI GOOGLE APPS SCRIPT ======
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwuQomNn42chOeSWKGgkH6fWyvi4qDQSm5BWaBMMgVsQht3ouxRF497cr5DfppcOHyl/exec';
+        const GAS_GREETING_URL = 'https://script.google.com/macros/s/AKfycbwuQomNn42chOeSWKGgkH6fWyvi4qDQSm5BWaBMMgVsQht3ouxRF497cr5DfppcOHyl/exec';
+        const GAS_ALAMAT_URL = 'https://script.google.com/macros/s/AKfycbw1yeMY5D4a9EnWMc9tQFq-bNCLBhcqYxh7tfKgQpo-K4AKM-hbHGYlCGO4O_vUywuwNg/exec';
 
+        // ==========================================
+        // FUNGSI HELPER: RENDER PDF KE GAMBAR (300 DPI)
+        // ==========================================
+        async function renderPDFToImage(base64Data, printTitle, modalToClose) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+            const pdfData = atob(base64Data);
+            const uint8Array = new Uint8Array(pdfData.length);
+            for (let i = 0; i < pdfData.length; i++) { uint8Array[i] = pdfData.charCodeAt(i); }
+            
+            try {
+                const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
+                const pdf = await loadingTask.promise;
+                const page = await pdf.getPage(1);
+                
+                const scale = 7.0; // Resolusi Tinggi
+                const viewport = page.getViewport({ scale: scale });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+                const highResImageURL = canvas.toDataURL('image/png');
+                
+                modalToClose(); // Tutup modal setelah render selesai
+                handlePrintImage(printTitle, highResImageURL); // Cetak
+                
+            } catch (renderError) {
+                console.error('Error render PDF:', renderError);
+                alert('Gagal merender dokumen beresolusi tinggi.');
+                modalToClose();
+            }
+        }
+
+        // ==========================================
+        // MODAL & LOGIKA: KARTU UCAPAN
+        // ==========================================
         const modal = document.getElementById('greetingModal');
         const modalContent = document.getElementById('modalContent');
 
@@ -524,7 +626,7 @@
             const btnText = document.getElementById('btnText');
             const btnLoading = document.getElementById('btnLoading');
 
-            let payload = {};
+            let payload = { type: 'greeting' };
             for (let i = 1; i <= 8; i++) {
                 payload['nama' + i] = document.getElementById('nama' + i).value;
             }
@@ -536,7 +638,8 @@
             btnLoading.classList.add('flex');
 
             try {
-                const response = await fetch(GAS_WEB_APP_URL, {
+                // MENGGUNAKAN URL GAS KHUSUS KARTU UCAPAN
+                const response = await fetch(GAS_GREETING_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
@@ -545,69 +648,107 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    // Konfigurasi Worker PDF.js
-                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-                    
-                    // 1. Ubah Base64 ke Format Array untuk PDF.js
-                    const pdfData = atob(result.pdfBase64);
-                    const uint8Array = new Uint8Array(pdfData.length);
-                    for (let i = 0; i < pdfData.length; i++) {
-                        uint8Array[i] = pdfData.charCodeAt(i);
-                    }
-                    
-                    try {
-                        // 2. Baca Dokumen PDF di memori browser
-                        const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
-                        const pdf = await loadingTask.promise;
-                        const page = await pdf.getPage(1); // Ambil halaman pertama
-                        
-                        // 3. SETTING RESOLUSI TINGGI (Scale 3.0 = Resolusi 300%)
-                        // Ini memastikan tulisan setajam vektor walau dicetak sebagai gambar
-                        const scale = 7.0; 
-                        const viewport = page.getViewport({ scale: scale });
-                        
-                        // 4. Siapkan Canvas Virtual (Tidak terlihat di layar)
-                        const canvas = document.createElement('canvas');
-                        const context = canvas.getContext('2d');
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
-                        
-                        // 5. Render PDF dengan sempurna ke Canvas
-                        const renderContext = {
-                            canvasContext: context,
-                            viewport: viewport
-                        };
-                        await page.render(renderContext).promise;
-                        
-                        // 6. Konversi hasil render ke gambar PNG beresolusi tinggi
-                        const highResImageURL = canvas.toDataURL('image/png');
-                        
-                        // 7. Tutup Modal Loading
-                        closeGreetingModal();
-                        
-                        // 8. OPAR KE FUNGSI PRINT GAMBAR BAWAAN ANDA!
-                        handlePrintImage('Kartu Ucapan Omiyage', highResImageURL);
-                        
-                    } catch (renderError) {
-                        console.error('Error saat merender PDF ke Gambar:', renderError);
-                        alert('Gagal merender dokumen untuk dicetak.');
-                        closeGreetingModal();
-                    }
-                    
+                    await renderPDFToImage(result.pdfBase64, 'Kartu Ucapan Personalisasi', closeGreetingModal);
                 } else {
                     alert('Gagal memproses kartu: ' + result.message);
                     closeGreetingModal();
                 }
-                    
-               
             } catch (error) {
-                showToast('Terjadi kesalahan cuy.', 'error');
+                showToast('Terjadi kesalahan jaringan cuy.', 'error');
                 console.error(error);
+                closeGreetingModal();
             } finally {
                 btn.disabled = false;
                 btn.classList.remove('opacity-90', 'cursor-not-allowed');
                 btnText.classList.remove('hidden');
                 btnLoading.classList.add('hidden');
+                btnLoading.classList.remove('flex');
+            }
+        }
+
+        // ==========================================
+        // MODAL & LOGIKA: ALAMAT OMIYAGE
+        // ==========================================
+        const alModal = document.getElementById('alamatModal');
+        const alModalContent = document.getElementById('alamatModalContent');
+
+        function openAlamatModal() {
+            alModal.classList.remove('hidden');
+            setTimeout(() => {
+                alModal.classList.remove('opacity-0', 'pointer-events-none');
+                alModalContent.classList.remove('scale-95');
+                alModalContent.classList.add('scale-100');
+            }, 10);
+            setTimeout(() => document.getElementById('al_nama_1')?.focus(), 200);
+        }
+
+        function closeAlamatModal() {
+            alModal.classList.add('opacity-0', 'pointer-events-none');
+            alModalContent.classList.remove('scale-100');
+            alModalContent.classList.add('scale-95');
+            setTimeout(() => {
+                alModal.classList.add('hidden');
+                // Reset 48 form
+                for(let i=1; i<=8; i++) {
+                    document.getElementById('al_nama_'+i).value = '';
+                    document.getElementById('al_nomor_'+i).value = '';
+                    document.getElementById('al_brs1_'+i).value = '';
+                    document.getElementById('al_brs2_'+i).value = '';
+                    document.getElementById('al_brs3_'+i).value = '';
+                    document.getElementById('al_brs4_'+i).value = '';
+                }
+            }, 300);
+        }
+        
+        alModal.addEventListener('click', (e) => { if (e.target === alModal) closeAlamatModal(); });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !alModal.classList.contains('hidden')) closeAlamatModal();
+        });
+
+        async function processAlamatCard() {
+            const btn = document.getElementById('btnProsesAlamat');
+            const btnText = document.getElementById('btnTextAlamat');
+            const btnLoading = document.getElementById('btnLoadingAlamat');
+            
+            let payload = { type: 'alamat' };
+            for(let i=1; i<=8; i++) {
+                payload['nama'+i] = document.getElementById('al_nama_'+i).value;
+                payload['nomor'+i] = document.getElementById('al_nomor_'+i).value;
+                payload['alamat'+i+'_1'] = document.getElementById('al_brs1_'+i).value;
+                payload['alamat'+i+'_2'] = document.getElementById('al_brs2_'+i).value;
+                payload['alamat'+i+'_3'] = document.getElementById('al_brs3_'+i).value;
+                payload['alamat'+i+'_4'] = document.getElementById('al_brs4_'+i).value;
+            }
+
+            btn.disabled = true; 
+            btn.classList.add('opacity-90', 'cursor-not-allowed');
+            btnText.classList.add('hidden'); 
+            btnLoading.classList.remove('hidden'); 
+            btnLoading.classList.add('flex');
+
+            try {
+                // MENGGUNAKAN URL GAS KHUSUS ALAMAT OMIYAGE
+                const response = await fetch(GAS_ALAMAT_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    await renderPDFToImage(result.pdfBase64, 'Stiker Alamat Omiyage', closeAlamatModal);
+                } else {
+                    alert('Gagal memproses alamat: ' + result.message);
+                    closeAlamatModal();
+                }
+            } catch (e) {
+                showToast('Terjadi kesalahan jaringan cuy.', 'error');
+                closeAlamatModal();
+            } finally {
+                btn.disabled = false; 
+                btn.classList.remove('opacity-90', 'cursor-not-allowed');
+                btnText.classList.remove('hidden'); 
+                btnLoading.classList.add('hidden'); 
                 btnLoading.classList.remove('flex');
             }
         }

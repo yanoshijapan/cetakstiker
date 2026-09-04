@@ -359,6 +359,13 @@
                                             <div class="col-span-1"><input type="text" id="al_nama_${i}" class="w-full p-2.5 border border-ink/10 rounded-xl focus:ring-2 focus:ring-gold/40 focus:border-gold focus:outline-none text-sm font-semibold text-ink bg-paper focus:bg-white placeholder-slate/40" placeholder="Nama Penerima"></div>
                                             <div class="col-span-1"><input type="text" id="al_nomor_${i}" class="w-full p-2.5 border border-ink/10 rounded-xl focus:ring-2 focus:ring-gold/40 focus:border-gold focus:outline-none text-sm font-semibold text-ink bg-paper focus:bg-white placeholder-slate/40" placeholder="Nomor HP"></div>
                                         </div>
+
+                                        <!-- KOLOM PASTE ALAMAT OTOMATIS -->
+                                        <div class="mb-3">
+                                            <textarea id="al_paste_${i}" oninput="autoSplitAddress(${i})" rows="2" class="w-full p-2.5 border border-stamp/20 rounded-xl focus:ring-2 focus:ring-stamp/40 focus:border-stamp focus:outline-none text-xs font-semibold text-ink bg-stampSoft focus:bg-white placeholder-stamp/60 transition-colors shadow-inner" placeholder="Paste alamat super panjang di sini (Otomatis pecah ke 4 baris)"></textarea>
+                                        </div>
+
+                                        <!-- 4 Baris Alamat Manual (Otomatis terisi, tapi masih bisa diedit manual) -->
                                         <div class="space-y-2">
                                             <input type="text" id="al_brs1_${i}" class="w-full p-2.5 border border-ink/10 rounded-xl focus:ring-1 focus:ring-gold/40 focus:outline-none text-xs font-medium text-ink bg-paper focus:bg-white placeholder-slate/40" placeholder="Alamat Baris 1">
                                             <input type="text" id="al_brs2_${i}" class="w-full p-2.5 border border-ink/10 rounded-xl focus:ring-1 focus:ring-gold/40 focus:outline-none text-xs font-medium text-ink bg-paper focus:bg-white placeholder-slate/40" placeholder="Alamat Baris 2">
@@ -591,6 +598,28 @@
         // ==========================================
         const modal = document.getElementById('greetingModal');
         const modalContent = document.getElementById('modalContent');
+				
+				// Fungsi untuk menutup modal Kartu Ucapan
+        function closeGreetingModal() {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Fungsi untuk menutup modal Alamat Omiyage
+        function closeAlamatModal() {
+            alModal.classList.add('opacity-0', 'pointer-events-none');
+            alModalContent.classList.remove('scale-100');
+            alModalContent.classList.add('scale-95');
+            
+            setTimeout(() => {
+                alModal.classList.add('hidden');
+            }, 300);
+        }
 
         function openGreetingModal() {
             modal.classList.remove('hidden');
@@ -600,20 +629,6 @@
                 modalContent.classList.add('scale-100');
             }, 10);
             setTimeout(() => document.getElementById('nama1')?.focus(), 200);
-        }
-
-        function closeGreetingModal() {
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            modalContent.classList.remove('scale-100');
-            modalContent.classList.add('scale-95');
-
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                for (let i = 1; i <= 8; i++) {
-                    const el = document.getElementById('nama' + i);
-                    if (el) el.value = '';
-                }
-            }, 300);
         }
 
         modal.addEventListener('click', (e) => { if (e.target === modal) closeGreetingModal(); });
@@ -648,6 +663,7 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
+                    clearAutosave('greeting'); // <--- TAMBAHKAN BARIS INI
                     await renderPDFToImage(result.pdfBase64, 'Kartu Ucapan Personalisasi', closeGreetingModal);
                 } else {
                     alert('Gagal memproses kartu: ' + result.message);
@@ -656,7 +672,7 @@
             } catch (error) {
                 showToast('Terjadi kesalahan jaringan cuy.', 'error');
                 console.error(error);
-                closeGreetingModal();
+       
             } finally {
                 btn.disabled = false;
                 btn.classList.remove('opacity-90', 'cursor-not-allowed');
@@ -682,23 +698,6 @@
             setTimeout(() => document.getElementById('al_nama_1')?.focus(), 200);
         }
 
-        function closeAlamatModal() {
-            alModal.classList.add('opacity-0', 'pointer-events-none');
-            alModalContent.classList.remove('scale-100');
-            alModalContent.classList.add('scale-95');
-            setTimeout(() => {
-                alModal.classList.add('hidden');
-                // Reset 48 form
-                for(let i=1; i<=8; i++) {
-                    document.getElementById('al_nama_'+i).value = '';
-                    document.getElementById('al_nomor_'+i).value = '';
-                    document.getElementById('al_brs1_'+i).value = '';
-                    document.getElementById('al_brs2_'+i).value = '';
-                    document.getElementById('al_brs3_'+i).value = '';
-                    document.getElementById('al_brs4_'+i).value = '';
-                }
-            }, 300);
-        }
         
         alModal.addEventListener('click', (e) => { if (e.target === alModal) closeAlamatModal(); });
         document.addEventListener('keydown', (e) => {
@@ -736,14 +735,13 @@
                 const result = await response.json();
                 
                 if (result.status === 'success') {
+                    clearAutosave('alamat'); // <--- TAMBAHKAN BARIS INI
                     await renderPDFToImage(result.pdfBase64, 'Stiker Alamat Omiyage', closeAlamatModal);
                 } else {
                     alert('Gagal memproses alamat: ' + result.message);
-                    closeAlamatModal();
                 }
             } catch (e) {
                 showToast('Terjadi kesalahan jaringan cuy.', 'error');
-                closeAlamatModal();
             } finally {
                 btn.disabled = false; 
                 btn.classList.remove('opacity-90', 'cursor-not-allowed');
@@ -823,6 +821,145 @@
             runSearch();
             searchInput.focus();
         });
+				// ==========================================
+        // FITUR AUTOSAVE (LOCALSTORAGE)
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ambil semua input text di dalam modal kartu ucapan dan alamat
+            const allInputs = document.querySelectorAll('#greetingModal input[type="text"], #alamatModal input[type="text"]');
+            
+            allInputs.forEach(input => {
+                // 1. Load data jika sudah ada di localStorage sebelumnya
+                const savedValue = localStorage.getItem('autosave_' + input.id);
+                if (savedValue !== null) {
+                    input.value = savedValue;
+                }
+                
+                // 2. Simpan ke localStorage setiap kali user mengetik (real-time)
+                input.addEventListener('input', function() {
+                    localStorage.setItem('autosave_' + this.id, this.value);
+                });
+            });
+        });
+
+        // Fungsi untuk menghapus autosave HANYA setelah sukses cetak
+        function clearAutosave(modalType) {
+            let inputs = [];
+            if (modalType === 'greeting') {
+                inputs = document.querySelectorAll('#greetingModal input[type="text"]');
+            } else if (modalType === 'alamat') {
+                inputs = document.querySelectorAll('#alamatModal input[type="text"]');
+            }
+            
+            inputs.forEach(input => {
+                input.value = ''; // Kosongkan field
+                localStorage.removeItem('autosave_' + input.id); // Hapus dari memori browser
+            });
+						if(modalType === 'alamat') {
+                for(let i=1; i<=8; i++) {
+                    const pasteBox = document.getElementById('al_paste_' + i);
+                    if(pasteBox) { 
+                        pasteBox.value = ''; 
+                        localStorage.removeItem('autosave_al_paste_' + i);
+                    }
+                }
+            }
+        }
+				// ==========================================
+        // FITUR AUTO-SPLIT ALAMAT CERDAS
+        // ==========================================
+        function autoSplitAddress(index) {
+            const textarea = document.getElementById(`al_paste_${index}`);
+            const fullAddress = textarea.value;
+            
+            // Batas aman maksimal karakter per baris cetak stiker (sesuaikan jika perlu)
+            const maxLen = 45; 
+            
+            // Bersihkan enter atau spasi berlebih
+            let cleanAddress = fullAddress.replace(/\s+/g, ' ').trim();
+            
+            // Pecah berdasarkan koma (,) agar format RT/RW/Kecamatan rapi
+            let chunks = cleanAddress.split(',').map(c => c.trim()).filter(c => c.length > 0);
+            
+            let lines = ['', '', '', ''];
+            let currentLine = 0;
+
+            // Fungsi helper untuk memotong kata panjang (Word Wrap)
+            function wordWrap(text, maxLinesAllowed) {
+                let words = text.split(' ');
+                let resultLines = Array(maxLinesAllowed).fill('');
+                let idx = 0;
+                for (let w of words) {
+                    if (idx >= maxLinesAllowed) break;
+                    if ((resultLines[idx] + w).length > maxLen) {
+                        idx++;
+                        if (idx >= maxLinesAllowed) break;
+                    }
+                    resultLines[idx] += (resultLines[idx].length > 0 ? ' ' : '') + w;
+                }
+                return resultLines;
+            }
+
+            // Jika alamat diketik tanpa koma sama sekali, pakai word wrap murni
+            if (chunks.length <= 1) {
+                lines = wordWrap(cleanAddress, 4);
+            } else {
+                for (let i = 0; i < chunks.length; i++) {
+                    // Kembalikan tanda komanya
+                    let chunk = chunks[i] + (i < chunks.length - 1 ? ',' : ''); 
+                    if (currentLine > 3) break;
+
+                    if (lines[currentLine] === '') {
+                        if (chunk.length > maxLen) {
+                            let sub = wordWrap(chunk, 4 - currentLine);
+                            for (let s of sub) {
+                                if (s && currentLine <= 3) {
+                                    lines[currentLine] = s;
+                                    currentLine++;
+                                }
+                            }
+                        } else {
+                            lines[currentLine] = chunk;
+                        }
+                    } else {
+                        // Cek apakah muat digabungkan ke baris saat ini
+                        if ((lines[currentLine] + ' ' + chunk).length <= maxLen) {
+                            lines[currentLine] += ' ' + chunk;
+                        } else {
+                            currentLine++;
+                            if (currentLine > 3) break;
+                            
+                            if (chunk.length > maxLen) {
+                                let sub = wordWrap(chunk, 4 - currentLine);
+                                for (let s of sub) {
+                                    if (s && currentLine <= 3) {
+                                        lines[currentLine] = s;
+                                        currentLine++;
+                                    }
+                                }
+                            } else {
+                                lines[currentLine] = chunk;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Tembakkan hasil pemisahan ke 4 baris input manual yang sudah ada
+            for (let i = 1; i <= 4; i++) {
+                const inputBaris = document.getElementById(`al_brs${i}_${index}`);
+                if (inputBaris) {
+                    inputBaris.value = lines[i-1] || '';
+                    
+                    // Trigger fitur AUTOSAVE (jika Anda memakai fitur di atas sebelumnya) 
+                    // agar baris yang baru terisi ini juga ikut tersimpan otomatis
+                    localStorage.setItem('autosave_' + inputBaris.id, inputBaris.value);
+                }
+            }
+            
+            // Simpan data textareanya ke autosave juga (opsional)
+            localStorage.setItem('autosave_al_paste_' + index, fullAddress);
+        }
     </script>
 </body>
 </html>
